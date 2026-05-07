@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resume Evaluator</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- 
+        HEADING 
+    -->
+
+    <div id="heading">
+      <h1>Resume Evaluator</h1>
+      <p>
+        Get professional feedback on your resume — honest, detailed, and free.
+      </p>
+    </div>
+
+    <!--
+     RESUME INPUT SECTION
+    -->
+
+    <div id="resume">
+      <h2>Your Resume</h2>
+      <textarea
+        id="resume-input"
+        placeholder="Paste your resume here..."
+      ></textarea>
+      <button id="evaluate-btn">Evaluate My Resume →</button>
+    </div>
+
+    <!--
+     EVALUATED SCORE
+    -->
+
+    <div id="evaluation">
+      <h3>Evaluation</h3>
+
+      <div id="score-section">
+        <h4>Overall Score</h4>
+        <div id="score-value">--</div>
+      </div>
+
+      <div id="feedback-section">
+        <h4>Feedback</h4>
+        <div id="feedback-output">Your evaluation will appear here...</div>
+      </div>
+      <button id="clear-btn">Clear Evaluation</button>
+    </div>
+
+    <footer id="footer">
+      <div class="footer-content">
+        <p>&copy; 2026 Ash.dev All rights reserved.</p>
+        <div class="footer-links">
+          <a href="https://github.com/yourusername" target="_blank">GitHub</a>
+          <a href="https://linkedin.com/in/yourusername" target="_blank"
+            >LinkedIn</a
+          >
+          <a href="https://twitter.com/yourusername" target="_blank">Twitter</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
