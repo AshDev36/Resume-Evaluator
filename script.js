@@ -1,5 +1,5 @@
 // YOUR API KEY
-const API_KEY = "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";
+const API_KEY = "";
 // GET DOM ELEMENTS
 const evaluateBtn = document.getElementById("evaluate-btn");
 const resumeInput = document.getElementById("resume-input");
