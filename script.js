@@ -1,5 +1,5 @@
 // YOUR API KEY
-const API_KEY = "";
+const API_KEY = import.meta.env.VITE_GROQ_API_KEY || "";
 // GET DOM ELEMENTS
 const evaluateBtn = document.getElementById("evaluate-btn");
 const resumeInput = document.getElementById("resume-input");
