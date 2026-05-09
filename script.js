@@ -1,5 +1,3 @@
-// YOUR API KEY
-const API_KEY = "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";
 // GET DOM ELEMENTS
 const evaluateBtn = document.getElementById("evaluate-btn");
 const resumeInput = document.getElementById("resume-input");
@@ -17,104 +15,105 @@ console.log("Elements loaded:", {
 // FUNCTION TO ANIMATE SCORE COUNT-UP
 function animateScore(targetScore) {
   let currentScore = 0;
-  const increment = targetScore / 30; // Divide by 30 for smooth 30-frame animation
-  const scoreElement = document.getElementById("score-value");
+  const increment = targetScore / 30;
 
   const interval = setInterval(() => {
     currentScore += increment;
 
     if (currentScore >= targetScore) {
-      scoreElement.textContent = targetScore;
+      scoreValue.textContent = targetScore;
       clearInterval(interval);
     } else {
-      scoreElement.textContent = currentScore.toFixed(1);
+      scoreValue.textContent = currentScore.toFixed(1);
     }
-  }, 30); // Update every 30ms
+  }, 30);
 }
 
-// ONE CLICK LISTENER
+// EVALUATE BUTTON CLICK
 evaluateBtn.addEventListener("click", async function () {
-  // GET THE RESUME TEXT
+  // GET RESUME TEXT
   const resumeText = resumeInput.value;
 
-  // VALIDATE - CHECK IF EMPTY
+  // VALIDATE INPUT
   if (resumeText.trim() === "") {
-    console.log("Resume is Empty");
+    feedbackOutput.textContent = "Please paste your resume first.";
     return;
   }
-  // SHOW LOADING STATE
+
+  // LOADING STATE
   evaluateBtn.disabled = true;
   evaluateBtn.textContent = "Evaluating...";
+
   scoreValue.textContent = "...";
   scoreValue.style.color = "#2563eb";
-  scoreValue.classList.remove("fade-in"); // ← ADD THIS
+
   feedbackOutput.textContent = "Getting your brutal evaluation...";
+
+  scoreValue.classList.remove("fade-in");
   feedbackOutput.classList.remove("fade-in");
 
-  console.log("Processing the data...");
-
-  // CALL THE GROQ API
   try {
-    const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [
-            {
-              role: "user",
-              content: `You are a brutally honest resume evaluator. Evaluate this resume with a mix of constructive feedback and sarcasm. 
-            
-                Provide your response in this exact format:
-                SCORE: [number between 0-10]
-                FEEDBACK: [your detailed feedback here]
+    // SEND REQUEST TO NETLIFY FUNCTION
+    const response = await fetch("/.netlify/functions/evaluate", {
+      method: "POST",
 
-                Resume:
-                ${resumeText}`,
-            },
-          ],
-          max_tokens: 1000,
-        }),
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
 
+      body: JSON.stringify({
+        resumeText: resumeText,
+      }),
+    });
+
+    // CHECK IF REQUEST FAILED
+    if (!response.ok) {
+      throw new Error("Server request failed");
+    }
+
+    // PARSE RESPONSE
     const data = await response.json();
 
-    // GET THE CONTENT TEXT FROM RESPONSE
+    // VALIDATE RESPONSE
+    if (!data.choices || !data.choices[0]) {
+      throw new Error("Invalid API response");
+    }
+
+    // GET AI CONTENT
     const content = data.choices[0].message.content;
 
-    // SPLIT BY "FEEDBACK:" TO GET SCORE AND FEEDBACK
+    // SPLIT SCORE + FEEDBACK
     const parts = content.split("FEEDBACK:");
-    const scoreText = parts[0]; // "SCORE: 8.5\n"
-    const feedbackText = parts[1]; // " Well, well, well..."
 
-    // EXTRACT JUST THE NUMBER FROM "SCORE: 8.5"
+    const scoreText = parts[0];
+    const feedbackText = parts[1];
+
+    // EXTRACT SCORE NUMBER
     const scoreMatch = scoreText.match(/\d+\.?\d*/);
-    const scoreNumber = scoreMatch ? parseFloat(scoreMatch[0]) : 0;
-    // CLEAN UP FEEDBACK TEXT (REMOVE EXTRA SPACES)
-    const cleanFeedback = feedbackText.trim();
 
-    // UPDATE THE HTML WITH RESULTS WITH ANIMATION
+    const scoreNumber = scoreMatch ? parseFloat(scoreMatch[0]) : 0;
+
+    // CLEAN FEEDBACK
+    const cleanFeedback = feedbackText
+      ? feedbackText.trim()
+      : "No feedback received.";
+
+    // UPDATE UI
     animateScore(scoreNumber);
+
     scoreValue.classList.add("fade-in");
 
     feedbackOutput.textContent = cleanFeedback;
     feedbackOutput.classList.add("fade-in");
 
-    // COLOR-CODE THE SCORE
+    // SCORE COLORS
     if (scoreNumber >= 7) {
-      scoreValue.style.color = "#10b981"; // Green for good
+      scoreValue.style.color = "#10b981";
     } else if (scoreNumber >= 5) {
-      scoreValue.style.color = "#f59e0b"; // Yellow/amber for okay
+      scoreValue.style.color = "#f59e0b";
     } else {
-      scoreValue.style.color = "#ef4444"; // Red for bad
+      scoreValue.style.color = "#ef4444";
     }
-    feedbackOutput.textContent = cleanFeedback;
 
     // RESTORE BUTTON
     evaluateBtn.disabled = false;
@@ -122,33 +121,36 @@ evaluateBtn.addEventListener("click", async function () {
   } catch (error) {
     console.error("Error:", error);
 
-    // SHOW ERROR MESSAGE TO USER
+    // ERROR UI
     feedbackOutput.textContent =
       "Oops! Something went wrong. Please try again.";
-    scoreValue.textContent = "Error";
 
-    // RE-ENABLE BUTTON SO THEY CAN TRY AGAIN
+    scoreValue.textContent = "Error";
+    scoreValue.style.color = "#ef4444";
+
+    // RESTORE BUTTON
     evaluateBtn.disabled = false;
     evaluateBtn.textContent = "Evaluate My Resume →";
   }
 });
 
-// CLEAR BUTTON LISTENER
+// CLEAR BUTTON
 const clearBtn = document.getElementById("clear-btn");
 
 clearBtn.addEventListener("click", function () {
-  // RESET TEXTAREA
+  // CLEAR INPUT
   resumeInput.value = "";
 
-  // RESET RESULTS
+  // RESET OUTPUT
   scoreValue.textContent = "--";
-  scoreValue.style.color = "#2563eb"; // Reset to original blue
+  scoreValue.style.color = "#2563eb";
+
   feedbackOutput.textContent = "Your evaluation will appear here...";
 
   // RESET BUTTON
   evaluateBtn.disabled = false;
   evaluateBtn.textContent = "Evaluate My Resume →";
 
-  // FOCUS ON TEXTAREA
+  // FOCUS INPUT
   resumeInput.focus();
 });
